@@ -50,14 +50,14 @@ ul {
 }
 .header-container .hero-container h1 {
   font-family: "Anton";
-  font-size: 2.8em;
+  font-size: 3.5em;
   color: #FFD15B;
   font-weight: 500;
   letter-spacing: 1.5px;
   text-align: center;
   margin: 0;
   margin-bottom: 40px;
-  margin-top: 160px;
+  margin-top: 200px;
 }
 .header-container .hero-container .search-bar {
   display: flex;
@@ -66,14 +66,14 @@ ul {
   justify-content: space-between;
   border-radius: 12px;
   background: #ffffff;
-  padding: 10px;
-  width: 70%;
-  height: 60px;
-  margin-bottom: 200px;
+  padding: 12px;
+  width: 60%;
+  height: 80px;
+  margin-bottom: 280px;
 }
 .header-container .hero-container .search-bar input {
   font-family: "Manrope";
-  font-size: 1em;
+  font-size: 1.4em;
   width: 100%;
   height: 70%;
   padding-left: 30px;
@@ -87,7 +87,7 @@ ul {
   justify-content: center;
   border: none;
   border-radius: 10px;
-  width: 65px;
+  width: 80px;
   height: 100%;
   background: #1B1B1B;
   color: #ffffff;
@@ -101,8 +101,137 @@ ul {
   color: #1B1B1B;
 }
 .header-container .hero-container .search-bar .search-btn i {
-  font-size: 2em;
+  font-size: 3em;
   color: #ffffff;
+}
+
+#receipe-gallery {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(200px, max-content));
+  gap: 90px 65px;
+  width: 100%;
+  margin-top: 60px;
+  justify-content: center;
+  align-items: center;
+}
+#receipe-gallery .recipe-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 490px;
+  height: 950px;
+  border-radius: 25px;
+  background: #ffffff;
+  box-shadow: 0px 4px 34px 30px rgba(0, 0, 0, 0.0392156863);
+  cursor: pointer;
+}
+#receipe-gallery .recipe-card .card-img {
+  position: relative;
+  width: 100%;
+  height: 330px;
+  border-radius: 24px 24px 0 0;
+}
+#receipe-gallery .recipe-card .card-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 24px 24px 0 0;
+}
+#receipe-gallery .recipe-card .card-img .recipe-time {
+  position: absolute;
+  top: 27px;
+  right: 25px;
+  padding: 6px 20px;
+  background: #FFD15B;
+  border-radius: 20px;
+  font-family: "Manrope";
+  font-weight: 300;
+  font-size: 1em;
+}
+#receipe-gallery .recipe-card .recipe-content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 0 30px;
+}
+#receipe-gallery .recipe-card .recipe-content .recipe-header {
+  display: flex;
+  flex-direction: column;
+}
+#receipe-gallery .recipe-card .recipe-content .recipe-header h2 {
+  font-family: "Anton";
+  font-size: 1.4em;
+  letter-spacing: 0.5px;
+  margin: 0;
+  margin: 45px 0;
+}
+#receipe-gallery .recipe-card .recipe-content .recipe-header .recette-txt {
+  text-transform: uppercase;
+  font-family: "Manrope";
+  font-size: 1em;
+  font-weight: 600;
+  letter-spacing: 1px;
+  color: #7A7A7A;
+}
+#receipe-gallery .recipe-card .recipe-content .recipe-header .description {
+  font-family: "Manrope";
+  font-size: 1.15em;
+  line-height: 1.4;
+  display: -webkit-box;
+  line-clamp: 4;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  height: 100px;
+  margin-top: 15px;
+}
+#receipe-gallery .recipe-card .recipe-content .recipe-body {
+  display: flex;
+  flex-direction: column;
+}
+#receipe-gallery .recipe-card .recipe-content .recipe-body .ingredients-txt {
+  text-transform: uppercase;
+  font-family: "Manrope";
+  font-size: 1em;
+  font-weight: 600;
+  letter-spacing: 1px;
+  color: #7A7A7A;
+  margin-top: 35px;
+}
+#receipe-gallery .recipe-card .recipe-content .recipe-body .ingredients {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 30px 60px;
+  font-family: "Manrope";
+  font-size: 1.1em;
+  margin-top: 15px;
+}
+#receipe-gallery .recipe-card .recipe-content .recipe-body .ingredients li {
+  display: flex;
+  flex-direction: column;
+  font-weight: 600;
+  color: #7A7A7A;
+  gap: 3px;
+}
+#receipe-gallery .recipe-card .recipe-content .recipe-body .ingredients li strong {
+  font-weight: 600;
+  color: #1B1B1B;
+}
+
+footer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 150px;
+  margin-top: 80px;
+  background: linear-gradient(#e5e5e5, #ffffff);
+  border-top: 1px solid #d6d6d6;
+}
+footer .footer-txt {
+  font-family: "Manrope";
+  font-size: 1.2em;
+  color: #1B1B1B;
 }
 
 /*# sourceMappingURL=style.css.map */

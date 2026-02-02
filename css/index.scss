@@ -35,14 +35,14 @@
 
         h1 {
             font-family: $font-title;
-            font-size: 2.8em;
+            font-size: 3.5em;
             color: $color-tr;
             font-weight: 500;
             letter-spacing: 1.5px;
             text-align: center;
             margin: 0;
             margin-bottom: 40px;
-            margin-top: 160px;
+            margin-top: 200px;
         }
 
         .search-bar {
@@ -53,14 +53,14 @@
             justify-content: space-between;
             border-radius: 12px;
             background: $color-secondary;
-            padding: 10px;
-            width: 70%;
-            height: 60px;
-            margin-bottom: 200px;
+            padding: 12px;
+            width: 60%;
+            height: 80px;
+            margin-bottom: 280px;
 
             input {
                 font-family: $font-text;
-                font-size: 1em;
+                font-size: 1.4em;
                 width: 100%;
                 height: 70%;
                 padding-left: 30px;
@@ -76,7 +76,7 @@
                 justify-content: center;
                 border: none;
                 border-radius: 10px;
-                width: 65px;
+                width: 80px;
                 height: 100%;
                 background: $color-title-card;
                 color: $color-secondary;
@@ -92,7 +92,7 @@
                 }
 
                 i {
-                    font-size: 2em;
+                    font-size: 3em;
                     color: $color-secondary;
                 }
             }
@@ -104,3 +104,158 @@
 
 
 // --------------------------------- GALLERY ------------------------------------
+
+#receipe-gallery {
+
+    display: grid;
+    grid-template-columns: repeat(3, minmax(200px, max-content));
+    gap: 90px 65px;
+    width: 100%;
+    margin-top: 60px;
+    justify-content: center;
+    align-items: center;
+
+    .recipe-card {
+
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 490px;
+        height: 950px;
+        border-radius: 25px;
+        background: $color-secondary;
+        box-shadow: 0px 4px 34px 30px $card-shadow;
+
+        cursor: pointer;
+
+        .card-img {
+
+            position: relative;
+            width: 100%;
+            height: 330px;
+            border-radius: 24px 24px 0 0;
+
+            img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                border-radius: 24px 24px 0 0;
+            }
+
+            .recipe-time {
+
+                position: absolute;
+                top: 27px;
+                right: 25px;
+                padding: 6px 20px;
+                background: $color-tr;
+                border-radius: 20px;
+                font-family: $font-text;
+                font-weight: 300;
+                font-size: 1em;
+            }
+        }
+
+        .recipe-content {
+
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            justify-content: center;
+            padding: 0 30px;
+
+            .recipe-header {
+
+                display: flex;
+                flex-direction: column;
+
+                h2 {
+                    font-family: $font-title;
+                    font-size: 1.4em;
+                    letter-spacing: 0.5px;
+                    margin: 0;
+                    margin: 45px 0;
+                }
+
+                .recette-txt {
+                    text-transform: uppercase;
+                    font-family: $font-text;
+                    font-size: 1em;
+                    font-weight: 600;
+                    letter-spacing: 1px;
+                    color: $color-ingrd-card;
+                }
+
+                .description {
+                    font-family: $font-text;
+                    font-size: 1.15em;
+                    line-height: 1.4;
+                    display: -webkit-box;
+                    line-clamp: 4;
+                    -webkit-line-clamp: 4;
+                    -webkit-box-orient: vertical;
+                    overflow: hidden;
+                    height: 100px;
+                    margin-top: 15px;
+                }
+            }
+
+            .recipe-body {
+
+                display: flex;
+                flex-direction: column;
+
+                .ingredients-txt {
+                    text-transform: uppercase;
+                    font-family: $font-text;
+                    font-size: 1em;
+                    font-weight: 600;
+                    letter-spacing: 1px;
+                    color: $color-ingrd-card;
+                    margin-top: 35px;
+                }
+
+                .ingredients {
+                    display: grid;
+                    grid-template-columns: repeat(2, 1fr);
+                    gap: 30px 60px;
+                    font-family: $font-text;
+                    font-size: 1.1em;
+                    margin-top: 15px;
+
+                    li {
+                        display: flex;
+                        flex-direction: column;
+                        font-weight: 600;
+                        color: $color-ingrd-card;
+                        gap: 3px;
+
+                        strong {
+                            font-weight: 600;
+                            color: $color-title-card;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+// --------------------------------- FOOTER ------------------------------------
+
+footer {
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 150px;
+    margin-top: 80px;
+    background: linear-gradient($color-primary, $color-secondary);
+    border-top: 1px solid $border-footer;
+
+    .footer-txt {
+        font-family: $font-text;
+        font-size: 1.2em;
+        color: $color-title-card;
+    }
+}

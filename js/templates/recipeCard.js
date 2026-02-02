@@ -11,30 +11,30 @@ export function createRecipeCard(recipe) {
     article.classList.add("recipe-card");
 
     article.innerHTML = `
+    <div class="card-img">
         <img src="../../assets/JSON recipes/${image}" alt="${name}">
-        
-        <div class="recipe-content">
-            <div class="recipe-header">
-                <h2>${name}</h2>
-                <span class="recipe-time">
-                    <i class="fa-regular fa-clock"></i> ${time} min
-                </span>
-            </div>
-
-            <div class="recipe-body">
-                <ul class="ingredients">
-                    ${ingredients.map(ing => `
-                        <li>
-                            <strong>${ing.ingredient}</strong>
-                            ${ing.quantity ? `: ${ing.quantity}` : ""}
-                            ${ing.unit ? ` ${ing.unit}` : ""}
-                        </li>
-                    `).join("")}
-                </ul>
-
-                <p class="description">${description}</p>
-            </div>
+        <span class="recipe-time">${time}min</span>
+    </div>
+    <div class="recipe-content">
+        <div class="recipe-header">
+            <h2>${name}</h2>
+            <p class="recette-txt">Recette</p>
+            <p class="description">${description}</p>
         </div>
+
+        <div class="recipe-body">
+        <p class="ingredients-txt">Ingrédients</p>
+            <ul class="ingredients">
+                ${ingredients.map(ing => `
+                    <li>
+                        <strong>${ing.ingredient}</strong>
+                        ${ing.quantity ? `${ing.quantity}` : ""}
+                        ${ing.unit ? `${ing.unit}` : ""}
+                    </li>
+                `).join("")}
+            </ul>
+        </div>
+    </div>
     `;
 
     return article;
