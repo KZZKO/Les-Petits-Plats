@@ -10,7 +10,7 @@
 
 .header-container {
 
-    background-image: url(../assets/images/Banner_wallpaper.jpg);
+    background-image: url(../assets/images/Banner_wallpaper.webp);
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
@@ -115,6 +115,16 @@
     justify-content: center;
     align-items: center;
 
+    .no-results {
+
+        grid-column: 1 / -1;
+        text-align: center;
+        font-family: $font-text;
+        font-size: 2em;
+        color: $color-text-error;
+        margin: 100px 0;
+    }
+
     .recipe-card {
 
         display: flex;
@@ -125,8 +135,9 @@
         border-radius: 25px;
         background: $color-secondary;
         box-shadow: 0px 4px 34px 30px $card-shadow;
-
         cursor: pointer;
+        opacity: 0;
+        animation: CardAppear 1s forwards;
 
         .card-img {
 
@@ -237,6 +248,19 @@
                     }
                 }
             }
+        }
+    }
+
+    @keyframes CardAppear {
+
+        from {
+            opacity: 0;
+            transform: translateY(50px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0px);
         }
     }
 }
