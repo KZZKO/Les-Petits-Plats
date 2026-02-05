@@ -58,7 +58,7 @@ export function getAllTagOptions(recipes) {
     };
 }
 
-// 2) Filtrer la liste affichée DANS un dropdown (search interne)
+// 2) Filtrer la liste affichée dans un dropdown (search interne)
 export function filterDropdownOptions(optionsList, query) {
     const q = normalize(query);
     if (!q) return optionsList;
@@ -66,7 +66,6 @@ export function filterDropdownOptions(optionsList, query) {
 }
 
 // 3) Filtrer les recettes avec tags sélectionnés
-// tagsState = { ingredients:Set, appliances:Set, ustensils:Set }
 export function filterByTags(recipes, tagsState) {
     const ingTags = [...tagsState.ingredients].map(normalize);
     const appTags = [...tagsState.appliances].map(normalize);

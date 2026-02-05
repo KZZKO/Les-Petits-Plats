@@ -105,6 +105,206 @@ ul {
   color: #ffffff;
 }
 
+#filter-tags {
+  width: 1600px;
+  margin: 70px auto 0 auto;
+}
+#filter-tags .filters-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+}
+#filter-tags .filters-bar .filter-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 30px;
+}
+#filter-tags .filters-bar .filter-top .filters-left {
+  display: flex;
+  align-items: flex-start;
+  gap: 25px;
+}
+#filter-tags .filters-bar .filter-top .filters-right {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+#filter-tags .filters-bar .filter-top .filters-right .recipes-count {
+  font-family: "Anton";
+  font-size: 1.6em;
+  color: #1B1B1B;
+  margin: 0;
+}
+#filter-tags .filters-bar .filter-top .filters-right .recipes-count #recipes-count {
+  font-family: "Anton";
+}
+#filter-tags .filters-bar .selected-tags {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+#filter-tags .filters-bar .selected-tags .tags-group:empty {
+  display: none;
+}
+#filter-tags .filters-bar .selected-tags .tags-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+#filter-tags .dropdown {
+  position: relative;
+  width: 240px;
+  border-radius: 12px;
+}
+#filter-tags .dropdown .dropdown-toggle {
+  width: 100%;
+  height: 68px;
+  padding: 0 18px;
+  border: none;
+  border-radius: 12px;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  box-shadow: 0px 6px 24px 0px rgba(0, 0, 0, 0.08);
+}
+#filter-tags .dropdown .dropdown-toggle .dropdown-label {
+  font-family: "Manrope";
+  font-size: 1.2em;
+  font-weight: 600;
+  color: #1B1B1B;
+}
+#filter-tags .dropdown .dropdown-toggle .dropdown-icon {
+  font-size: 1.15em;
+  color: #1B1B1B;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.22s ease;
+  transform-origin: center;
+}
+#filter-tags .dropdown.is-open .dropdown-toggle {
+  border-radius: 12px 12px 0 0;
+}
+#filter-tags .dropdown.is-open .dropdown-toggle .dropdown-icon {
+  transform: rotate(180deg);
+}
+#filter-tags .dropdown .dropdown-panel {
+  position: absolute;
+  top: 68px;
+  left: 0;
+  width: 100%;
+  background: #ffffff;
+  border-radius: 0 0 12px 12px;
+  box-shadow: 0px 14px 34px 0px rgba(0, 0, 0, 0.14);
+  overflow: hidden;
+  z-index: 50;
+}
+#filter-tags .dropdown .dropdown-panel .dropdown-search {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: #ffffff;
+  padding: 14px 14px 10px 14px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  position: sticky;
+  top: 0;
+}
+#filter-tags .dropdown .dropdown-panel .dropdown-search .dropdown-input {
+  width: 100%;
+  height: 44px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  padding: 0 44px 0 12px;
+  font-family: "Manrope";
+  font-size: 1.05em;
+  outline: none;
+}
+#filter-tags .dropdown .dropdown-panel .dropdown-search .dropdown-input:focus {
+  border-color: rgba(0, 0, 0, 0.25);
+}
+#filter-tags .dropdown .dropdown-panel .dropdown-search .dropdown-search-icon {
+  position: absolute;
+  right: 26px;
+  top: 53%;
+  transform: translateY(-50%);
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 44px;
+  pointer-events: none;
+  font-size: 1.05em;
+  opacity: 0.55;
+  color: #1B1B1B;
+}
+#filter-tags .dropdown .dropdown-panel .dropdown-search {
+  position: sticky;
+  top: 0;
+}
+#filter-tags .dropdown .dropdown-panel .dropdown-list,
+#filter-tags .dropdown .dropdown-panel .dropdown-selected {
+  list-style: none;
+  margin: 0;
+}
+#filter-tags .dropdown .dropdown-panel .dropdown-list {
+  max-height: 300px;
+  overflow-y: auto;
+}
+#filter-tags .dropdown .dropdown-panel .dropdown-item {
+  padding: 0;
+}
+#filter-tags .dropdown .dropdown-panel .dropdown-item .dropdown-item-btn {
+  width: 100%;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  padding: 10px 16px;
+  border-radius: 0;
+  font-family: "Manrope";
+  font-size: 1.05em;
+  color: #1B1B1B;
+}
+#filter-tags .dropdown .dropdown-panel .dropdown-item .dropdown-item-btn:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+#filter-tags .dropdown .dropdown-panel .dropdown-item.is-selected .dropdown-item-btn {
+  background: #FFD15B;
+  font-weight: 700;
+  border-radius: 0;
+}
+#filter-tags .tag-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 20px;
+  border: none;
+  border-radius: 12px;
+  padding: 15px 20px;
+  cursor: pointer;
+  background: #FFD15B;
+  box-shadow: 0px 6px 24px 0px rgba(0, 0, 0, 0.08);
+}
+#filter-tags .tag-chip .tag-label {
+  font-family: "Manrope";
+  font-size: 1.2em;
+  font-weight: 700;
+  color: #1B1B1B;
+}
+#filter-tags .tag-chip .tag-remove {
+  font-size: 1.1em;
+  font-weight: 700;
+  color: #1B1B1B;
+  opacity: 0;
+  transform: translateX(-4px);
+  transition: 0.18s ease;
+}
+#filter-tags .tag-chip:hover .tag-remove {
+  opacity: 1;
+  transform: translateX(0);
+}
+
 #receipe-gallery {
   display: grid;
   grid-template-columns: repeat(3, minmax(200px, max-content));
