@@ -88,7 +88,3 @@ export function filterByTags(recipes, tagsState) {
         return matchIngredients && matchAppliances && matchUstensils;
     });
 }
-
-
-// --------------------------------- COMBINED ---------------------------------
-

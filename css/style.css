@@ -59,6 +59,11 @@ ul {
   margin-bottom: 40px;
   margin-top: 200px;
 }
+@media (max-width: 1440px) {
+  .header-container .hero-container h1 {
+    font-size: 3em;
+  }
+}
 .header-container .hero-container .search-bar {
   display: flex;
   flex-direction: row;
@@ -70,6 +75,11 @@ ul {
   width: 60%;
   height: 80px;
   margin-bottom: 280px;
+}
+@media (max-width: 1440px) {
+  .header-container .hero-container .search-bar {
+    width: 70%;
+  }
 }
 .header-container .hero-container .search-bar input {
   font-family: "Manrope";
@@ -104,10 +114,20 @@ ul {
   font-size: 3em;
   color: #ffffff;
 }
+@media (max-width: 1440px) {
+  .header-container .hero-container .search-bar .search-btn i {
+    font-size: 2.5em;
+  }
+}
 
 #filter-tags {
   width: 1600px;
   margin: 70px auto 0 auto;
+}
+@media (max-width: 1440px) {
+  #filter-tags {
+    width: 1300px;
+  }
 }
 #filter-tags .filters-bar {
   display: flex;
@@ -135,13 +155,14 @@ ul {
   font-size: 1.6em;
   color: #1B1B1B;
   margin: 0;
+  margin-top: 15px;
 }
 #filter-tags .filters-bar .filter-top .filters-right .recipes-count #recipes-count {
   font-family: "Anton";
 }
 #filter-tags .filters-bar .selected-tags {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   gap: 14px;
 }
 #filter-tags .filters-bar .selected-tags .tags-group:empty {
@@ -281,7 +302,7 @@ ul {
   gap: 20px;
   border: none;
   border-radius: 12px;
-  padding: 15px 20px;
+  padding: 20px 25px;
   cursor: pointer;
   background: #FFD15B;
   box-shadow: 0px 6px 24px 0px rgba(0, 0, 0, 0.08);
@@ -314,6 +335,11 @@ ul {
   justify-content: center;
   align-items: center;
 }
+@media (max-width: 1440px) {
+  #receipe-gallery {
+    grid-template-columns: repeat(2, minmax(200px, max-content));
+  }
+}
 #receipe-gallery .no-results {
   grid-column: 1/-1;
   text-align: center;
@@ -326,7 +352,8 @@ ul {
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: 490px;
+  width: 100%;
+  max-width: 490px;
   height: 950px;
   border-radius: 25px;
   background: #ffffff;

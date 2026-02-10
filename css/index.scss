@@ -43,6 +43,11 @@
             margin: 0;
             margin-bottom: 40px;
             margin-top: 200px;
+
+            @media (max-width: $xl) {
+
+                font-size: 3em;
+            }
         }
 
         .search-bar {
@@ -57,6 +62,11 @@
             width: 60%;
             height: 80px;
             margin-bottom: 280px;
+
+            @media (max-width: $xl) {
+
+                width: 70%;
+            }
 
             input {
                 font-family: $font-text;
@@ -94,6 +104,11 @@
                 i {
                     font-size: 3em;
                     color: $color-secondary;
+
+                    @media (max-width: $xl) {
+
+                        font-size: 2.5em;
+                    }
                 }
             }
         }
@@ -107,6 +122,11 @@
 
     width: 1600px;
     margin: 70px auto 0 auto;
+
+    @media (max-width: $xl) {
+
+        width: 1300px;
+    }
 
     .filters-bar {
         display: flex;
@@ -135,6 +155,7 @@
                     font-size: 1.6em;
                     color: $color-title-card;
                     margin: 0;
+                    margin-top: 15px;
 
                     #recipes-count {
                         font-family: $font-title;
@@ -145,7 +166,7 @@
 
         .selected-tags {
             display: flex;
-            flex-direction: column;
+            flex-direction: row;
             gap: 14px;
 
             .tags-group:empty {
@@ -319,7 +340,7 @@
         gap: 20px;
         border: none;
         border-radius: 12px;
-        padding: 15px 20px;
+        padding: 20px 25px;
         cursor: pointer;
         background: $color-tr;
         box-shadow: 0px 6px 24px 0px rgba(0, 0, 0, 0.08);
@@ -362,6 +383,11 @@
     justify-content: center;
     align-items: center;
 
+    @media (max-width: $xl) {
+
+        grid-template-columns: repeat(2, minmax(200px, max-content));
+    }
+
     .no-results {
 
         grid-column: 1 / -1;
@@ -377,7 +403,8 @@
         display: flex;
         flex-direction: column;
         align-items: center;
-        width: 490px;
+        width: 100%;
+        max-width: 490px;
         height: 950px;
         border-radius: 25px;
         background: $color-secondary;
