@@ -14,7 +14,8 @@ export function renderTagsUI() {
 
         <div class="filters-right">
           <p class="recipes-count">
-            <span id="recipes-count">0</span> recettes
+            <span id="recipes-count">0</span>
+            <span id="recipes-label">recettes</span>
           </p>
         </div>
       </div>

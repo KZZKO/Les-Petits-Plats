@@ -1,18 +1,45 @@
 import { recipes } from "../data/recipes.js";
-import { displayRecipes } from "../main.js";
-import { filterBySearch } from "./filter.js";
+import { filterBySearch, filterByTags } from "./filter.js";
 import { debounce } from "../utils/debounce.js";
+
+let renderFn = null;
+
+export function initFiltersController(renderFunction) {
+    renderFn = renderFunction;
+}
 
 const state = {
     search: "",
+    tags: {
+        ingredients: new Set(),
+        appliances: new Set(),
+        ustensils: new Set(),
+    },
 };
 
-let isFiltered = false; // false = on affiche TOUTES les recettes
+let prevSearchActive = false;
+
+function hasAnyTags(tags) {
+    return (
+        tags.ingredients.size > 0 ||
+        tags.appliances.size > 0 ||
+        tags.ustensils.size > 0
+    );
+}
 
 function compute() {
-    // ici on sait qu’on est >= 3
-    const filtered = filterBySearch(recipes, state.search);
-    displayRecipes(filtered);
+    let list = recipes;
+
+    if (hasAnyTags(state.tags)) {
+        list = filterByTags(list, state.tags);
+    }
+
+    const q = state.search.trim();
+    if (q.length >= 3) {
+        list = filterBySearch(list, q);
+    }
+
+    if (renderFn) renderFn(list);
 }
 
 const debouncedCompute = debounce(compute, 400);
@@ -21,19 +48,31 @@ export function notifyFiltersChanged(partialState) {
     Object.assign(state, partialState);
 
     const q = state.search.trim();
+    const searchActive = q.length >= 3;
 
-    // < 3 caractères : on annule la recherche et on évite les re-render
-    if (q.length < 3) {
+    const tagsChanged = Object.prototype.hasOwnProperty.call(partialState, "tags");
+    const searchChanged = Object.prototype.hasOwnProperty.call(partialState, "search");
+
+    if (tagsChanged) {
         debouncedCompute.cancel();
-
-        if (isFiltered) {
-            displayRecipes(recipes);
-            isFiltered = false;
-        }
+        compute();
+        prevSearchActive = searchActive;
         return;
     }
 
-    // >= 3 : on passe en mode filtré
-    isFiltered = true;
-    debouncedCompute();
+    if (searchChanged) {
+        if (!searchActive) {
+            debouncedCompute.cancel();
+            if (prevSearchActive) compute();
+            prevSearchActive = false;
+            return;
+        }
+
+        prevSearchActive = true;
+        debouncedCompute();
+        return;
+    }
+
+    debouncedCompute.cancel();
+    compute();
 }

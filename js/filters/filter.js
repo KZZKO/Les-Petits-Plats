@@ -5,17 +5,29 @@ export function filterBySearch(recipes, search) {
 
     if (query.length < 3) return recipes;
 
-    return recipes.filter(recipe => {
-        return (
-            recipe.name.toLowerCase().includes(query) ||
-            recipe.description.toLowerCase().includes(query) ||
-            recipe.ingredients.some(ing =>
-                ing.ingredient.toLowerCase().includes(query)
-            )
-        );
-    });
-}
+    // version for-loop
+    const results = [];
 
+    for (let i = 0; i < recipes.length; i++) {
+        const recipe = recipes[i];
+
+        const nameMatch = recipe.name.toLowerCase().includes(query);
+        const descMatch = recipe.description.toLowerCase().includes(query);
+
+        let ingMatch = false;
+        for (let j = 0; j < recipe.ingredients.length; j++) {
+            const ing = recipe.ingredients[j];
+            if (ing.ingredient.toLowerCase().includes(query)) {
+                ingMatch = true;
+                break;
+            }
+        }
+
+        if (nameMatch || descMatch || ingMatch) results.push(recipe);
+    }
+
+    return results;
+}
 
 // --------------------------------- TAGS ------------------------------------
 
@@ -29,7 +41,6 @@ function capitalize(str) {
     return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
-// 1) Récupérer toutes les options uniques depuis recipes
 export function getAllTagOptions(recipes) {
     const ing = new Map();
     const app = new Map();
@@ -58,14 +69,12 @@ export function getAllTagOptions(recipes) {
     };
 }
 
-// 2) Filtrer la liste affichée dans un dropdown (search interne)
 export function filterDropdownOptions(optionsList, query) {
     const q = normalize(query);
     if (!q) return optionsList;
     return optionsList.filter((opt) => normalize(opt).includes(q));
 }
 
-// 3) Filtrer les recettes avec tags sélectionnés
 export function filterByTags(recipes, tagsState) {
     const ingTags = [...tagsState.ingredients].map(normalize);
     const appTags = [...tagsState.appliances].map(normalize);
@@ -88,7 +97,3 @@ export function filterByTags(recipes, tagsState) {
         return matchIngredients && matchAppliances && matchUstensils;
     });
 }
-
-
-// --------------------------------- COMBINED ---------------------------------
-

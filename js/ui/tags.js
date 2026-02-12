@@ -1,11 +1,7 @@
 import { recipes } from "../data/recipes.js";
-import { displayRecipes } from "../main.js";
 import { renderTagsUI } from "../templates/tagsTemplate.js";
-import {
-    getAllTagOptions,
-    filterDropdownOptions,
-    filterByTags,
-} from "../filters/filter.js";
+import { getAllTagOptions, filterDropdownOptions } from "../filters/filter.js";
+import { notifyFiltersChanged } from "../filters/filtersController.js";
 
 const tagsState = {
     ingredients: new Set(),
@@ -24,11 +20,6 @@ function escapeHtml(str) {
         .replaceAll("'", "&#039;");
 }
 
-function updateCount(n) {
-    const el = document.getElementById("recipes-count");
-    if (el) el.textContent = String(n);
-}
-
 function renderDropdownList(dropdownEl, type, query = "") {
     const selectedEl = dropdownEl.querySelector(".dropdown-selected");
     const listEl = dropdownEl.querySelector(".dropdown-list");
@@ -37,30 +28,34 @@ function renderDropdownList(dropdownEl, type, query = "") {
     const base = allOptions[type];
     const filtered = filterDropdownOptions(base, query);
 
-    // 1) Selected (toujours visibles, même si on scroll)
+    // Selected (toujours visibles)
     const selected = [...tagsState[type]];
 
     selectedEl.innerHTML = selected
-        .map((value) => `
+        .map(
+            (value) => `
       <li class="dropdown-item is-selected">
         <button type="button" class="dropdown-item-btn" data-value="${escapeHtml(value)}">
           ${escapeHtml(value)}
         </button>
       </li>
-    `)
+    `
+        )
         .join("");
 
-    // 2) Liste scrollable : uniquement les non-sélectionnés + match query
+    // Liste scrollable : uniquement les non-sélectionnés + match query
     const rest = filtered.filter((v) => !tagsState[type].has(v));
 
     listEl.innerHTML = rest
-        .map((value) => `
+        .map(
+            (value) => `
       <li class="dropdown-item">
         <button type="button" class="dropdown-item-btn" data-value="${escapeHtml(value)}">
           ${escapeHtml(value)}
         </button>
       </li>
-    `)
+    `
+        )
         .join("");
 }
 
@@ -69,9 +64,7 @@ function renderSelectedTags() {
     if (!container) return;
 
     ["ingredients", "appliances", "ustensils"].forEach((type) => {
-        const group = container.querySelector(
-            `.tags-group[data-type="${type}"]`
-        );
+        const group = container.querySelector(`.tags-group[data-type="${type}"]`);
         if (!group) return;
 
         group.innerHTML = [...tagsState[type]]
@@ -92,15 +85,10 @@ function renderSelectedTags() {
     });
 }
 
-function applyTagsFilter() {
-    const filtered = filterByTags(recipes, tagsState);
-    displayRecipes(filtered);
-    updateCount(filtered.length);
-}
-
 function closeDropdown(dd) {
     const btn = dd.querySelector(".dropdown-toggle");
     const panel = dd.querySelector(".dropdown-panel");
+    if (!btn || !panel) return;
 
     panel.hidden = true;
     btn.setAttribute("aria-expanded", "false");
@@ -113,6 +101,7 @@ function closeDropdown(dd) {
 function openDropdown(dd) {
     const btn = dd.querySelector(".dropdown-toggle");
     const panel = dd.querySelector(".dropdown-panel");
+    if (!btn || !panel) return;
 
     panel.hidden = false;
     btn.setAttribute("aria-expanded", "true");
@@ -122,19 +111,40 @@ function openDropdown(dd) {
     if (input) input.focus();
 }
 
+function closeAll(container) {
+    container.querySelectorAll(".dropdown").forEach(closeDropdown);
+}
+
+// 🔥 un seul appel pour “appliquer” = on notifie le controller
+function notifyController() {
+    notifyFiltersChanged({ tags: tagsState });
+}
+
 (function initTags() {
     const container = document.getElementById("filter-tags");
     if (!container) return;
 
+    // render UI
     renderTagsUI();
-    allOptions = getAllTagOptions(recipes);
-    updateCount(recipes.length);
 
+    // options
+    allOptions = getAllTagOptions(recipes);
+
+    // init lists
     container.querySelectorAll(".dropdown").forEach((dd) => {
         renderDropdownList(dd, dd.dataset.type);
     });
 
+    // init chips (vide)
+    renderSelectedTags();
+
+    // IMPORTANT : au départ on applique "0 tags" => controller affiche toutes les recettes et met le compteur
+    notifyController();
+
+    // EVENTS
+
     container.addEventListener("click", (e) => {
+        // open/close
         const toggle = e.target.closest(".dropdown-toggle");
         if (toggle) {
             const dd = toggle.closest(".dropdown");
@@ -145,22 +155,27 @@ function openDropdown(dd) {
             return;
         }
 
+        // select option
         const itemBtn = e.target.closest(".dropdown-item-btn");
         if (itemBtn) {
             const dd = itemBtn.closest(".dropdown");
             const type = dd.dataset.type;
             const value = itemBtn.dataset.value;
 
-            tagsState[type].has(value)
-                ? tagsState[type].delete(value)
-                : tagsState[type].add(value);
+            // toggle tag
+            if (tagsState[type].has(value)) tagsState[type].delete(value);
+            else tagsState[type].add(value);
 
-            renderDropdownList(dd, type, dd.querySelector(".dropdown-input")?.value);
+            // refresh UI
+            renderDropdownList(dd, type, dd.querySelector(".dropdown-input")?.value || "");
             renderSelectedTags();
-            applyTagsFilter();
+
+            // combined recalcul
+            notifyController();
             return;
         }
 
+        // remove chip
         const chip = e.target.closest(".tag-chip");
         if (chip) {
             const type = chip.dataset.type;
@@ -170,12 +185,14 @@ function openDropdown(dd) {
             renderSelectedTags();
 
             const dd = container.querySelector(`.dropdown[data-type="${type}"]`);
-            if (dd) renderDropdownList(dd, type);
+            if (dd) renderDropdownList(dd, type, dd.querySelector(".dropdown-input")?.value || "");
 
-            applyTagsFilter();
+            notifyController();
+            return;
         }
     });
 
+    // input dropdown => filtre UNIQUEMENT la liste visible
     container.addEventListener("input", (e) => {
         const input = e.target.closest(".dropdown-input");
         if (!input) return;
@@ -184,6 +201,7 @@ function openDropdown(dd) {
         renderDropdownList(dd, dd.dataset.type, input.value);
     });
 
+    // search event (quand tu cliques la croix du input search)
     container.addEventListener("search", (e) => {
         const input = e.target.closest(".dropdown-input");
         if (!input) return;
@@ -192,15 +210,13 @@ function openDropdown(dd) {
         renderDropdownList(dd, dd.dataset.type, "");
     });
 
+    // click outside => close
     document.addEventListener("click", (e) => {
-        if (!container.contains(e.target)) {
-            container.querySelectorAll(".dropdown").forEach(closeDropdown);
-        }
+        const root = document.getElementById("filter-tags");
+        if (root && !root.contains(e.target)) closeAll(root);
     });
 
     document.addEventListener("keydown", (e) => {
-        if (e.key === "Escape") {
-            container.querySelectorAll(".dropdown").forEach(closeDropdown);
-        }
+        if (e.key === "Escape") closeAll(document.getElementById("filter-tags"));
     });
 })();
