@@ -4,7 +4,6 @@ import { getAllTagOptions, filterDropdownOptions } from "../filters/filter.js";
 import { subscribeToResults } from "../filters/filtersController.js";
 import { controller } from "../main.js";
 
-// État local des tags sélectionnés
 const tagsState = {
     ingredients: new Set(),
     appliances: new Set(),
@@ -13,7 +12,7 @@ const tagsState = {
 
 let allOptions = getAllTagOptions(recipes);
 
-// Protège l’affichage contre l’injection HTML
+// Sécurise le HTML injecté dans le DOM
 function escapeHtml(str) {
     return String(str)
         .replaceAll("&", "&amp;")
@@ -23,7 +22,20 @@ function escapeHtml(str) {
         .replaceAll("'", "&#039;");
 }
 
-// Clone pour éviter de partager les mêmes Set avec le controller
+// Normalise une valeur pour comparer sans prise de tête
+function normalize(value) {
+    return String(value || "").trim().toLowerCase();
+}
+
+// Récupère la search active (>=3) pour éviter de proposer le même tag
+function getActiveSearchQuery() {
+    const searchInput = document.getElementById("search-input");
+    const query = searchInput?.value ?? "";
+    const normalizedQuery = normalize(query);
+    return normalizedQuery.length >= 3 ? normalizedQuery : "";
+}
+
+// Clone l’état des tags (on évite de partager les mêmes Set)
 function cloneTagsState() {
     return {
         ingredients: new Set(tagsState.ingredients),
@@ -32,7 +44,7 @@ function cloneTagsState() {
     };
 }
 
-// Ferme un dropdown (UI + aria + reset input)
+// Ferme un dropdown et reset son champ de recherche
 function closeDropdown(dropdown) {
     const toggleButton = dropdown.querySelector(".dropdown-toggle");
     const dropdownPanel = dropdown.querySelector(".dropdown-panel");
@@ -46,7 +58,7 @@ function closeDropdown(dropdown) {
     if (dropdownInput) dropdownInput.value = "";
 }
 
-// Ouvre un dropdown (UI + aria + focus input)
+// Ouvre un dropdown et focus le champ de recherche
 function openDropdown(dropdown) {
     const toggleButton = dropdown.querySelector(".dropdown-toggle");
     const dropdownPanel = dropdown.querySelector(".dropdown-panel");
@@ -60,7 +72,7 @@ function openDropdown(dropdown) {
     if (dropdownInput) dropdownInput.focus();
 }
 
-// Met à jour les chips de tags sélectionnés
+// Met à jour l’affichage des tags sélectionnés (chips)
 function renderSelectedTags() {
     const tagsContainer = document.getElementById("filter-tags");
     if (!tagsContainer) return;
@@ -87,7 +99,7 @@ function renderSelectedTags() {
     });
 }
 
-// Met à jour la liste d’un dropdown (selected sticky + liste filtrée)
+// Rend la liste d’un dropdown (selected sticky + options filtrées)
 function renderDropdownList(dropdown, type, query = "") {
     const selectedList = dropdown.querySelector(".dropdown-selected");
     const optionsList = dropdown.querySelector(".dropdown-list");
@@ -103,7 +115,7 @@ function renderDropdownList(dropdown, type, query = "") {
 
     const filteredOptions = filterDropdownOptions(mergedOptions, query);
 
-    // Zone sticky : uniquement les tags déjà sélectionnés
+    // Sticky selected
     selectedList.innerHTML = selectedValues
         .map(
             (value) => `
@@ -120,8 +132,12 @@ function renderDropdownList(dropdown, type, query = "") {
         )
         .join("");
 
-    // Liste scrollable : uniquement les non sélectionnés
-    const remainingOptions = filteredOptions.filter((value) => !tagsState[type].has(value));
+    const activeSearchQuery = getActiveSearchQuery();
+
+    // Options visibles (hors sélection + hors search exacte)
+    const remainingOptions = filteredOptions
+        .filter((value) => !tagsState[type].has(value))
+        .filter((value) => normalize(value) !== activeSearchQuery);
 
     optionsList.innerHTML = remainingOptions
         .map(
@@ -140,9 +156,9 @@ function renderDropdownList(dropdown, type, query = "") {
         .join("");
 }
 
-// Re-render toutes les listes en gardant la saisie en cours
-function rerenderAllDropdownLists(container) {
-    container.querySelectorAll(".dropdown").forEach((dropdown) => {
+// Rafraîchit toutes les listes de dropdowns (en gardant la saisie)
+function rerenderAllDropdownLists(tagsContainer) {
+    tagsContainer.querySelectorAll(".dropdown").forEach((dropdown) => {
         const type = dropdown.dataset.type;
         const query = dropdown.querySelector(".dropdown-input")?.value || "";
         renderDropdownList(dropdown, type, query);
@@ -158,7 +174,6 @@ function notifyController() {
     const tagsContainer = document.getElementById("filter-tags");
     if (!tagsContainer) return;
 
-    // Structure HTML des dropdowns + groupes
     renderTagsUI();
 
     // Rendu initial
@@ -167,13 +182,14 @@ function notifyController() {
     });
     renderSelectedTags();
 
-    // Quand la liste filtrée change, on recalcule les options possibles
+    // Recalcule les options compatibles à chaque changement de résultats
     subscribeToResults((currentList) => {
         allOptions = getAllTagOptions(currentList || []);
         rerenderAllDropdownLists(tagsContainer);
     });
 
-    // Clicks : toggle dropdown, selection, suppression chip
+    // --------------------------------- EVENTS --------------------------------
+
     tagsContainer.addEventListener("click", (event) => {
         const toggleButton = event.target.closest(".dropdown-toggle");
         if (toggleButton) {
@@ -183,7 +199,9 @@ function notifyController() {
                 if (otherDropdown !== dropdown) closeDropdown(otherDropdown);
             });
 
-            dropdown.classList.contains("is-open") ? closeDropdown(dropdown) : openDropdown(dropdown);
+            dropdown.classList.contains("is-open")
+                ? closeDropdown(dropdown)
+                : openDropdown(dropdown);
             return;
         }
 
@@ -220,7 +238,7 @@ function notifyController() {
         }
     });
 
-    // Recherche dans un dropdown (filtre la liste visible uniquement)
+    // Filtre la liste du dropdown quand on tape dedans
     tagsContainer.addEventListener("input", (event) => {
         const dropdownInput = event.target.closest(".dropdown-input");
         if (!dropdownInput) return;
@@ -229,7 +247,7 @@ function notifyController() {
         renderDropdownList(dropdown, dropdown.dataset.type, dropdownInput.value);
     });
 
-    // Clear via le "X" natif (input[type="search"])
+    // Reset la liste quand on clique sur la croix du champ
     tagsContainer.addEventListener("search", (event) => {
         const dropdownInput = event.target.closest(".dropdown-input");
         if (!dropdownInput) return;
@@ -238,14 +256,14 @@ function notifyController() {
         renderDropdownList(dropdown, dropdown.dataset.type, "");
     });
 
-    // Click hors zone : ferme tout
+    // Ferme tout si on clique en dehors
     document.addEventListener("click", (event) => {
         if (!tagsContainer.contains(event.target)) {
             tagsContainer.querySelectorAll(".dropdown").forEach(closeDropdown);
         }
     });
 
-    // ESC : ferme tout
+    // Ferme tout avec ESC
     document.addEventListener("keydown", (event) => {
         if (event.key === "Escape") {
             tagsContainer.querySelectorAll(".dropdown").forEach(closeDropdown);

@@ -2,7 +2,7 @@ import { recipes } from "../data/recipes.js";
 import { filterBySearch, filterByTags } from "./filter.js";
 import { debounce } from "../utils/debounce.js";
 
-// État global des filtres
+// État global des filtres (search + tags sélectionnés)
 const state = {
     search: "",
     tags: {
@@ -12,26 +12,29 @@ const state = {
     },
 };
 
+// Sert à savoir si la search était active (>= 3 caractères)
 let prevSearchActive = false;
 
-// Liste filtrée courante + abonnés (utile pour recalculer les options de tags)
+// Stocke la dernière liste filtrée calculée
 let lastFilteredList = recipes;
+
+// Liste des modules abonnés aux résultats (ex: tags)
 const resultsListeners = new Set();
 
-// Permet à l’UI (tags) de recevoir la liste filtrée à chaque update
+// Abonne un module UI à la liste filtrée courante
 export function subscribeToResults(callback) {
     resultsListeners.add(callback);
     callback(lastFilteredList);
     return () => resultsListeners.delete(callback);
 }
 
-// Notifie tous les abonnés avec la nouvelle liste filtrée
+// Envoie la nouvelle liste filtrée à tous les abonnés
 function emitResults(list) {
     lastFilteredList = list;
     resultsListeners.forEach((callback) => callback(list));
 }
 
-// Vérifie si au moins un tag est actif
+// Vérifie s’il y a au moins un tag actif
 function hasAnyTags(tags) {
     return (
         tags.ingredients.size > 0 ||
@@ -40,7 +43,7 @@ function hasAnyTags(tags) {
     );
 }
 
-// Recalcule la liste filtrée et déclenche le rendu + l’emit pour les tags
+// Recalcule la liste filtrée puis déclenche render + update des options
 function compute(renderFn) {
     let list = recipes;
 
@@ -59,15 +62,16 @@ function compute(renderFn) {
 
 // Initialise le controller et renvoie l’API utilisée par l’UI
 export function initFiltersController(renderFn) {
+
+    // Version debounced du compute pour la search
     const debouncedCompute = debounce(() => compute(renderFn), 400);
 
-    // Point d’entrée unique : l’UI envoie ici les changements (search / tags)
+    // Point d’entrée unique : l’UI envoie search/tags ici
     function notifyFiltersChanged(partialState) {
         Object.assign(state, partialState);
 
         const query = state.search.trim();
         const searchActive = query.length >= 3;
-        const tagsActive = hasAnyTags(state.tags);
 
         const tagsChanged = Object.prototype.hasOwnProperty.call(partialState, "tags");
         const searchChanged = Object.prototype.hasOwnProperty.call(partialState, "search");
@@ -85,9 +89,8 @@ export function initFiltersController(renderFn) {
             if (!searchActive) {
                 debouncedCompute.cancel();
 
+                // On recalcule une fois quand on repasse sous 3 chars
                 if (prevSearchActive) {
-                    compute(renderFn);
-                } else if (tagsActive) {
                     compute(renderFn);
                 }
 
