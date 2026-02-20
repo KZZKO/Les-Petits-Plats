@@ -5,6 +5,7 @@ import { initFiltersController } from "./filters/filtersController.js";
 import "./ui/searchbar.js";
 import "./ui/tags.js";
 
+// Affiche la liste des recettes dans la galerie
 export function displayRecipes(recipesList) {
     const gallery = document.getElementById("receipe-gallery");
     if (!gallery) return;
@@ -34,8 +35,8 @@ export function displayRecipes(recipesList) {
     });
 }
 
-// IMPORTANT
+// Branche le render dans le controller
 initFiltersController(displayRecipes);
 
-// affichage initial
+// Affichage initial
 displayRecipes(recipes);
