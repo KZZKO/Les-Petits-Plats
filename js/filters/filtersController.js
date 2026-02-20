@@ -1,8 +1,8 @@
 import { recipes } from "../data/recipes.js";
-import { displayRecipes } from "../main.js";
 import { filterBySearch, filterByTags } from "./filter.js";
 import { debounce } from "../utils/debounce.js";
 
+// État global des filtres
 const state = {
     search: "",
     tags: {
@@ -12,9 +12,26 @@ const state = {
     },
 };
 
-// Pour éviter certains re-render inutiles pendant que l’utilisateur tape < 3
 let prevSearchActive = false;
 
+// Liste filtrée courante + abonnés (utile pour recalculer les options de tags)
+let lastFilteredList = recipes;
+const resultsListeners = new Set();
+
+// Permet à l’UI (tags) de recevoir la liste filtrée à chaque update
+export function subscribeToResults(callback) {
+    resultsListeners.add(callback);
+    callback(lastFilteredList);
+    return () => resultsListeners.delete(callback);
+}
+
+// Notifie tous les abonnés avec la nouvelle liste filtrée
+function emitResults(list) {
+    lastFilteredList = list;
+    resultsListeners.forEach((callback) => callback(list));
+}
+
+// Vérifie si au moins un tag est actif
 function hasAnyTags(tags) {
     return (
         tags.ingredients.size > 0 ||
@@ -23,81 +40,69 @@ function hasAnyTags(tags) {
     );
 }
 
-function updateCount(n) {
-    const el = document.getElementById("recipes-count");
-    if (el) el.textContent = String(n);
-}
-
-function compute() {
-    // 1) base = toutes les recettes
+// Recalcule la liste filtrée et déclenche le rendu + l’emit pour les tags
+function compute(renderFn) {
     let list = recipes;
 
-    // 2) tags (toujours appliqués si au moins 1 tag)
     if (hasAnyTags(state.tags)) {
         list = filterByTags(list, state.tags);
     }
 
-    // 3) search (uniquement si >= 3 caractères)
-    const q = state.search.trim();
-    if (q.length >= 3) {
-        list = filterBySearch(list, q);
+    const query = state.search.trim();
+    if (query.length >= 3) {
+        list = filterBySearch(list, query);
     }
 
-    displayRecipes(list);
-    updateCount(list.length);
+    renderFn(list);
+    emitResults(list);
 }
 
-const debouncedCompute = debounce(compute, 400);
+// Initialise le controller et renvoie l’API utilisée par l’UI
+export function initFiltersController(renderFn) {
+    const debouncedCompute = debounce(() => compute(renderFn), 400);
 
-export function notifyFiltersChanged(partialState) {
-    // merge shallow
-    Object.assign(state, partialState);
+    // Point d’entrée unique : l’UI envoie ici les changements (search / tags)
+    function notifyFiltersChanged(partialState) {
+        Object.assign(state, partialState);
 
-    const q = state.search.trim();
-    const searchActive = q.length >= 3;
-    const tagsActive = hasAnyTags(state.tags);
+        const query = state.search.trim();
+        const searchActive = query.length >= 3;
+        const tagsActive = hasAnyTags(state.tags);
 
-    const tagsChanged = Object.prototype.hasOwnProperty.call(partialState, "tags");
-    const searchChanged = Object.prototype.hasOwnProperty.call(partialState, "search");
+        const tagsChanged = Object.prototype.hasOwnProperty.call(partialState, "tags");
+        const searchChanged = Object.prototype.hasOwnProperty.call(partialState, "search");
 
-    // Si les tags changent => on veut un update immédiat (pas de debounce)
-    if (tagsChanged) {
-        debouncedCompute.cancel();
-        compute();
-
-        // met à jour l’état de référence pour le search
-        prevSearchActive = searchActive;
-        return;
-    }
-
-    // Si la search change (input principal)
-    if (searchChanged) {
-        // < 3 caractères : on ne déclenche pas de recherche
-        // MAIS: si on avait une recherche active avant, il faut recalculer une fois
-        // (soit tags-only, soit all recipes)
-        if (!searchActive) {
+        // Tags : update immédiat
+        if (tagsChanged) {
             debouncedCompute.cancel();
-
-            if (prevSearchActive) {
-                // on vient de “désactiver” la search => recalcul immédiat
-                compute();
-            } else {
-                // on tapote < 3 : ne re-render pas pour rien
-                // (sauf si tags actifs ? non, car tags ne changent pas ici)
-                // donc on ne fait rien
-            }
-
-            prevSearchActive = false;
+            compute(renderFn);
+            prevSearchActive = searchActive;
             return;
         }
 
-        // >= 3 caractères : on applique debounce
-        prevSearchActive = true;
-        debouncedCompute();
-        return;
+        // Search : debounce seulement si >= 3 caractères
+        if (searchChanged) {
+            if (!searchActive) {
+                debouncedCompute.cancel();
+
+                if (prevSearchActive) {
+                    compute(renderFn);
+                } else if (tagsActive) {
+                    compute(renderFn);
+                }
+
+                prevSearchActive = false;
+                return;
+            }
+
+            prevSearchActive = true;
+            debouncedCompute();
+            return;
+        }
+
+        debouncedCompute.cancel();
+        compute(renderFn);
     }
 
-    // fallback (si un jour tu passes autre chose dans partialState)
-    debouncedCompute.cancel();
-    compute();
+    return { notifyFiltersChanged };
 }

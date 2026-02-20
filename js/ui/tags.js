@@ -1,16 +1,19 @@
 import { recipes } from "../data/recipes.js";
 import { renderTagsUI } from "../templates/tagsTemplate.js";
 import { getAllTagOptions, filterDropdownOptions } from "../filters/filter.js";
-import { notifyFiltersChanged } from "../filters/filtersController.js";
+import { subscribeToResults } from "../filters/filtersController.js";
+import { controller } from "../main.js";
 
+// État local des tags sélectionnés
 const tagsState = {
     ingredients: new Set(),
     appliances: new Set(),
     ustensils: new Set(),
 };
 
-let allOptions = null;
+let allOptions = getAllTagOptions(recipes);
 
+// Protège l’affichage contre l’injection HTML
 function escapeHtml(str) {
     return String(str)
         .replaceAll("&", "&amp;")
@@ -20,49 +23,50 @@ function escapeHtml(str) {
         .replaceAll("'", "&#039;");
 }
 
-function renderDropdownList(dropdownEl, type, query = "") {
-    const selectedEl = dropdownEl.querySelector(".dropdown-selected");
-    const listEl = dropdownEl.querySelector(".dropdown-list");
-    if (!selectedEl || !listEl) return;
-
-    const base = allOptions[type];
-    const filtered = filterDropdownOptions(base, query);
-
-    // Selected (sticky)
-    const selected = [...tagsState[type]];
-    selectedEl.innerHTML = selected
-        .map(
-            (value) => `
-        <li class="dropdown-item is-selected">
-          <button type="button" class="dropdown-item-btn" data-value="${escapeHtml(value)}">
-            ${escapeHtml(value)}
-          </button>
-        </li>
-      `
-        )
-        .join("");
-
-    // List scrollable (non selected only)
-    const rest = filtered.filter((v) => !tagsState[type].has(v));
-    listEl.innerHTML = rest
-        .map(
-            (value) => `
-        <li class="dropdown-item">
-          <button type="button" class="dropdown-item-btn" data-value="${escapeHtml(value)}">
-            ${escapeHtml(value)}
-          </button>
-        </li>
-      `
-        )
-        .join("");
+// Clone pour éviter de partager les mêmes Set avec le controller
+function cloneTagsState() {
+    return {
+        ingredients: new Set(tagsState.ingredients),
+        appliances: new Set(tagsState.appliances),
+        ustensils: new Set(tagsState.ustensils),
+    };
 }
 
+// Ferme un dropdown (UI + aria + reset input)
+function closeDropdown(dropdown) {
+    const toggleButton = dropdown.querySelector(".dropdown-toggle");
+    const dropdownPanel = dropdown.querySelector(".dropdown-panel");
+    if (!toggleButton || !dropdownPanel) return;
+
+    dropdownPanel.hidden = true;
+    toggleButton.setAttribute("aria-expanded", "false");
+    dropdown.classList.remove("is-open");
+
+    const dropdownInput = dropdown.querySelector(".dropdown-input");
+    if (dropdownInput) dropdownInput.value = "";
+}
+
+// Ouvre un dropdown (UI + aria + focus input)
+function openDropdown(dropdown) {
+    const toggleButton = dropdown.querySelector(".dropdown-toggle");
+    const dropdownPanel = dropdown.querySelector(".dropdown-panel");
+    if (!toggleButton || !dropdownPanel) return;
+
+    dropdownPanel.hidden = false;
+    toggleButton.setAttribute("aria-expanded", "true");
+    dropdown.classList.add("is-open");
+
+    const dropdownInput = dropdown.querySelector(".dropdown-input");
+    if (dropdownInput) dropdownInput.focus();
+}
+
+// Met à jour les chips de tags sélectionnés
 function renderSelectedTags() {
-    const container = document.getElementById("filter-tags");
-    if (!container) return;
+    const tagsContainer = document.getElementById("filter-tags");
+    if (!tagsContainer) return;
 
     ["ingredients", "appliances", "ustensils"].forEach((type) => {
-        const group = container.querySelector(`.tags-group[data-type="${type}"]`);
+        const group = tagsContainer.querySelector(`.tags-group[data-type="${type}"]`);
         if (!group) return;
 
         group.innerHTML = [...tagsState[type]]
@@ -83,123 +87,168 @@ function renderSelectedTags() {
     });
 }
 
-function closeDropdown(dd) {
-    const btn = dd.querySelector(".dropdown-toggle");
-    const panel = dd.querySelector(".dropdown-panel");
+// Met à jour la liste d’un dropdown (selected sticky + liste filtrée)
+function renderDropdownList(dropdown, type, query = "") {
+    const selectedList = dropdown.querySelector(".dropdown-selected");
+    const optionsList = dropdown.querySelector(".dropdown-list");
+    if (!selectedList || !optionsList) return;
 
-    panel.hidden = true;
-    btn.setAttribute("aria-expanded", "false");
-    dd.classList.remove("is-open");
+    const baseOptions = allOptions[type] || [];
+    const selectedValues = [...tagsState[type]];
 
-    const input = dd.querySelector(".dropdown-input");
-    if (input) input.value = "";
+    const mergedOptions = [
+        ...selectedValues,
+        ...baseOptions.filter((value) => !tagsState[type].has(value)),
+    ];
+
+    const filteredOptions = filterDropdownOptions(mergedOptions, query);
+
+    // Zone sticky : uniquement les tags déjà sélectionnés
+    selectedList.innerHTML = selectedValues
+        .map(
+            (value) => `
+        <li class="dropdown-item is-selected">
+          <button
+            type="button"
+            class="dropdown-item-btn"
+            data-value="${escapeHtml(value)}"
+          >
+            ${escapeHtml(value)}
+          </button>
+        </li>
+      `
+        )
+        .join("");
+
+    // Liste scrollable : uniquement les non sélectionnés
+    const remainingOptions = filteredOptions.filter((value) => !tagsState[type].has(value));
+
+    optionsList.innerHTML = remainingOptions
+        .map(
+            (value) => `
+        <li class="dropdown-item">
+          <button
+            type="button"
+            class="dropdown-item-btn"
+            data-value="${escapeHtml(value)}"
+          >
+            ${escapeHtml(value)}
+          </button>
+        </li>
+      `
+        )
+        .join("");
 }
 
-function openDropdown(dd) {
-    const btn = dd.querySelector(".dropdown-toggle");
-    const panel = dd.querySelector(".dropdown-panel");
+// Re-render toutes les listes en gardant la saisie en cours
+function rerenderAllDropdownLists(container) {
+    container.querySelectorAll(".dropdown").forEach((dropdown) => {
+        const type = dropdown.dataset.type;
+        const query = dropdown.querySelector(".dropdown-input")?.value || "";
+        renderDropdownList(dropdown, type, query);
+    });
+}
 
-    panel.hidden = false;
-    btn.setAttribute("aria-expanded", "true");
-    dd.classList.add("is-open");
-
-    const input = dd.querySelector(".dropdown-input");
-    if (input) input.focus();
+// Envoie l’état des tags au controller
+function notifyController() {
+    controller.notifyFiltersChanged({ tags: cloneTagsState() });
 }
 
 (function initTags() {
-    const container = document.getElementById("filter-tags");
-    if (!container) return;
+    const tagsContainer = document.getElementById("filter-tags");
+    if (!tagsContainer) return;
 
-    // Render structure
+    // Structure HTML des dropdowns + groupes
     renderTagsUI();
 
-    // Build options once
-    allOptions = getAllTagOptions(recipes);
+    // Rendu initial
+    tagsContainer.querySelectorAll(".dropdown").forEach((dropdown) => {
+        renderDropdownList(dropdown, dropdown.dataset.type);
+    });
+    renderSelectedTags();
 
-    // Init lists
-    container.querySelectorAll(".dropdown").forEach((dd) => {
-        renderDropdownList(dd, dd.dataset.type);
+    // Quand la liste filtrée change, on recalcule les options possibles
+    subscribeToResults((currentList) => {
+        allOptions = getAllTagOptions(currentList || []);
+        rerenderAllDropdownLists(tagsContainer);
     });
 
-    // EVENTS
+    // Clicks : toggle dropdown, selection, suppression chip
+    tagsContainer.addEventListener("click", (event) => {
+        const toggleButton = event.target.closest(".dropdown-toggle");
+        if (toggleButton) {
+            const dropdown = toggleButton.closest(".dropdown");
 
-    container.addEventListener("click", (e) => {
-        // Open/close dropdown
-        const toggle = e.target.closest(".dropdown-toggle");
-        if (toggle) {
-            const dd = toggle.closest(".dropdown");
-            container.querySelectorAll(".dropdown").forEach((d) => {
-                if (d !== dd) closeDropdown(d);
+            tagsContainer.querySelectorAll(".dropdown").forEach((otherDropdown) => {
+                if (otherDropdown !== dropdown) closeDropdown(otherDropdown);
             });
-            dd.classList.contains("is-open") ? closeDropdown(dd) : openDropdown(dd);
+
+            dropdown.classList.contains("is-open") ? closeDropdown(dropdown) : openDropdown(dropdown);
             return;
         }
 
-        // Click item in dropdown (selected or not)
-        const itemBtn = e.target.closest(".dropdown-item-btn");
-        if (itemBtn) {
-            const dd = itemBtn.closest(".dropdown");
-            const type = dd.dataset.type;
-            const value = itemBtn.dataset.value;
+        const optionButton = event.target.closest(".dropdown-item-btn");
+        if (optionButton) {
+            const dropdown = optionButton.closest(".dropdown");
+            const type = dropdown.dataset.type;
+            const value = optionButton.dataset.value;
 
-            // Toggle selection
-            tagsState[type].has(value) ? tagsState[type].delete(value) : tagsState[type].add(value);
+            if (tagsState[type].has(value)) tagsState[type].delete(value);
+            else tagsState[type].add(value);
 
-            // Update dropdown UI + chips
-            renderDropdownList(dd, type, dd.querySelector(".dropdown-input")?.value);
+            renderDropdownList(dropdown, type, dropdown.querySelector(".dropdown-input")?.value || "");
             renderSelectedTags();
-
-            // SEUL endroit où on déclenche le filtrage global : controller
-            notifyFiltersChanged({ tags: tagsState });
+            notifyController();
             return;
         }
 
-        // Remove chip
-        const chip = e.target.closest(".tag-chip");
-        if (chip) {
-            const type = chip.dataset.type;
-            const value = chip.dataset.value;
+        const chipButton = event.target.closest(".tag-chip");
+        if (chipButton) {
+            const type = chipButton.dataset.type;
+            const value = chipButton.dataset.value;
 
             tagsState[type].delete(value);
             renderSelectedTags();
 
-            const dd = container.querySelector(`.dropdown[data-type="${type}"]`);
-            if (dd) renderDropdownList(dd, type, dd.querySelector(".dropdown-input")?.value || "");
+            const dropdown = tagsContainer.querySelector(`.dropdown[data-type="${type}"]`);
+            if (dropdown) {
+                renderDropdownList(dropdown, type, dropdown.querySelector(".dropdown-input")?.value || "");
+            }
 
-            notifyFiltersChanged({ tags: tagsState });
+            notifyController();
             return;
         }
     });
 
-    // Search inside dropdown => filter list only
-    container.addEventListener("input", (e) => {
-        const input = e.target.closest(".dropdown-input");
-        if (!input) return;
+    // Recherche dans un dropdown (filtre la liste visible uniquement)
+    tagsContainer.addEventListener("input", (event) => {
+        const dropdownInput = event.target.closest(".dropdown-input");
+        if (!dropdownInput) return;
 
-        const dd = input.closest(".dropdown");
-        renderDropdownList(dd, dd.dataset.type, input.value);
+        const dropdown = dropdownInput.closest(".dropdown");
+        renderDropdownList(dropdown, dropdown.dataset.type, dropdownInput.value);
     });
 
-    // Native “x” on input[type="search"] triggers "search" event when cleared
-    container.addEventListener("search", (e) => {
-        const input = e.target.closest(".dropdown-input");
-        if (!input) return;
+    // Clear via le "X" natif (input[type="search"])
+    tagsContainer.addEventListener("search", (event) => {
+        const dropdownInput = event.target.closest(".dropdown-input");
+        if (!dropdownInput) return;
 
-        const dd = input.closest(".dropdown");
-        renderDropdownList(dd, dd.dataset.type, "");
+        const dropdown = dropdownInput.closest(".dropdown");
+        renderDropdownList(dropdown, dropdown.dataset.type, "");
     });
 
-    // Click outside => close
-    document.addEventListener("click", (e) => {
-        if (!container.contains(e.target)) {
-            container.querySelectorAll(".dropdown").forEach(closeDropdown);
+    // Click hors zone : ferme tout
+    document.addEventListener("click", (event) => {
+        if (!tagsContainer.contains(event.target)) {
+            tagsContainer.querySelectorAll(".dropdown").forEach(closeDropdown);
         }
     });
 
-    document.addEventListener("keydown", (e) => {
-        if (e.key === "Escape") {
-            container.querySelectorAll(".dropdown").forEach(closeDropdown);
+    // ESC : ferme tout
+    document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") {
+            tagsContainer.querySelectorAll(".dropdown").forEach(closeDropdown);
         }
     });
 })();
