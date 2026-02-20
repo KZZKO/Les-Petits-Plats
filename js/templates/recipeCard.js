@@ -12,7 +12,7 @@ export function createRecipeCard(recipe) {
 
     article.innerHTML = `
     <div class="card-img">
-        <img src="../../assets/JSON recipes/${image}" alt="${name}">
+        <img src="./assets/JSON recipes/${image}" alt="${name}">
         <span class="recipe-time">${time}min</span>
     </div>
     <div class="recipe-content">
