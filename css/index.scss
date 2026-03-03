@@ -1,22 +1,18 @@
 @use "settings" as *;
 
-
 // |===========================================================================|
 // |----------------------------| Style du site |------------------------------|
 // |===========================================================================|
 
-
 // --------------------------------- HEADER ------------------------------------
 
 .header-container {
-
     background-image: url(../assets/images/Banner_wallpaper.webp);
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
 
     .logo-container {
-
         display: inline-flex;
         align-items: center;
         justify-content: flex-start;
@@ -24,10 +20,20 @@
         gap: 5px;
         margin-top: 50px;
         margin-left: 70px;
+
+        @media (max-width: $lg) {
+            margin-top: 32px;
+            margin-left: 28px;
+        }
+
+        @media (max-width: $mg) {
+            margin-top: 24px;
+            margin-left: 18px;
+            gap: 8px;
+        }
     }
 
     .hero-container {
-
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -45,13 +51,25 @@
             margin-top: 200px;
 
             @media (max-width: $xl) {
-
                 font-size: 3em;
+            }
+
+            @media (max-width: $lg) {
+                font-size: 2.4em;
+                margin-top: 140px;
+                margin-bottom: 28px;
+                padding: 0 18px;
+            }
+
+            @media (max-width: $mg) {
+                font-size: 2em;
+                margin-top: 110px;
+                margin-bottom: 22px;
+                letter-spacing: 1px;
             }
         }
 
         .search-bar {
-
             display: flex;
             flex-direction: row;
             align-items: center;
@@ -64,8 +82,22 @@
             margin-bottom: 280px;
 
             @media (max-width: $xl) {
-
                 width: 70%;
+            }
+
+            @media (max-width: $lg) {
+                width: 88%;
+                height: 68px;
+                margin-bottom: 180px;
+                padding: 10px;
+            }
+
+            @media (max-width: $mg) {
+                width: 92%;
+                height: 62px;
+                margin-bottom: 140px;
+                padding: 8px;
+                border-radius: 10px;
             }
 
             input {
@@ -77,10 +109,21 @@
                 padding-right: 20px;
                 border: none;
                 outline: none;
+
+                @media (max-width: $lg) {
+                    font-size: 1.15em;
+                    padding-left: 18px;
+                    padding-right: 12px;
+                }
+
+                @media (max-width: $mg) {
+                    font-size: 1.05em;
+                    padding-left: 14px;
+                    padding-right: 10px;
+                }
             }
 
             .search-btn {
-
                 display: flex;
                 align-items: center;
                 justify-content: center;
@@ -92,6 +135,16 @@
                 color: $color-secondary;
                 cursor: pointer;
                 transition: 0.3s ease;
+
+                @media (max-width: $lg) {
+                    width: 64px;
+                    border-radius: 10px;
+                }
+
+                @media (max-width: $mg) {
+                    width: 56px;
+                    border-radius: 9px;
+                }
 
                 &:hover {
                     background: $color-tr;
@@ -106,8 +159,15 @@
                     color: $color-secondary;
 
                     @media (max-width: $xl) {
-
                         font-size: 2.5em;
+                    }
+
+                    @media (max-width: $lg) {
+                        font-size: 2.1em;
+                    }
+
+                    @media (max-width: $mg) {
+                        font-size: 1.9em;
                     }
                 }
             }
@@ -115,17 +175,24 @@
     }
 }
 
-
 // --------------------------------- FILTERS ------------------------------------
 
 #filter-tags {
-
     width: 1600px;
     margin: 70px auto 0 auto;
 
     @media (max-width: $xl) {
-
         width: 1300px;
+    }
+
+    @media (max-width: $lg) {
+        width: 92%;
+        margin-top: 48px;
+    }
+
+    @media (max-width: $mg) {
+        width: 92%;
+        margin-top: 36px;
     }
 
     .filters-bar {
@@ -133,16 +200,35 @@
         flex-direction: column;
         gap: 25px;
 
+        @media (max-width: $lg) {
+            gap: 18px;
+        }
+
         .filter-top {
             display: flex;
             align-items: flex-start;
             justify-content: space-between;
             gap: 30px;
 
+            @media (max-width: $lg) {
+                flex-direction: column;
+                gap: 14px;
+                align-items: stretch;
+            }
+
             .filters-left {
                 display: flex;
                 align-items: flex-start;
                 gap: 25px;
+
+                @media (max-width: $lg) {
+                    flex-wrap: wrap;
+                    gap: 14px;
+                }
+
+                @media (max-width: $mg) {
+                    gap: 12px;
+                }
             }
 
             .filters-right {
@@ -150,12 +236,25 @@
                 align-items: center;
                 justify-content: flex-end;
 
+                @media (max-width: $lg) {
+                    justify-content: flex-start;
+                }
+
                 .recipes-count {
                     font-family: $font-title;
                     font-size: 1.6em;
                     color: $color-title-card;
                     margin: 0;
                     margin-top: 15px;
+
+                    @media (max-width: $lg) {
+                        margin-top: 0;
+                        font-size: 1.35em;
+                    }
+
+                    @media (max-width: $mg) {
+                        font-size: 1.2em;
+                    }
 
                     #recipes-count {
                         font-family: $font-title;
@@ -169,6 +268,11 @@
             flex-direction: row;
             gap: 14px;
 
+            @media (max-width: $lg) {
+                gap: 10px;
+                flex-wrap: wrap;
+            }
+
             .tags-group:empty {
                 display: none;
             }
@@ -177,6 +281,10 @@
                 display: flex;
                 flex-wrap: wrap;
                 gap: 12px;
+
+                @media (max-width: $mg) {
+                    gap: 10px;
+                }
             }
         }
     }
@@ -189,6 +297,17 @@
         position: relative;
         width: 240px;
         border-radius: 12px;
+
+        @media (max-width: $lg) {
+            width: calc(50% - 7px);
+            min-width: 220px;
+            flex: 1 1 auto;
+        }
+
+        @media (max-width: $mg) {
+            width: 100%;
+            min-width: 0;
+        }
 
         .dropdown-toggle {
             width: 100%;
@@ -203,11 +322,29 @@
             cursor: pointer;
             box-shadow: 0px 6px 24px 0px rgba(0, 0, 0, 0.08);
 
+            @media (max-width: $lg) {
+                height: 62px;
+            }
+
+            @media (max-width: $mg) {
+                height: 58px;
+                padding: 0 14px;
+                border-radius: 10px;
+            }
+
             .dropdown-label {
                 font-family: $font-text;
                 font-size: 1.2em;
                 font-weight: 600;
                 color: $color-title-card;
+
+                @media (max-width: $lg) {
+                    font-size: 1.1em;
+                }
+
+                @media (max-width: $mg) {
+                    font-size: 1.05em;
+                }
             }
 
             .dropdown-icon {
@@ -218,12 +355,20 @@
                 justify-content: center;
                 transition: transform 0.22s ease;
                 transform-origin: center;
+
+                @media (max-width: $mg) {
+                    font-size: 1.05em;
+                }
             }
         }
 
         &.is-open {
             .dropdown-toggle {
                 border-radius: 12px 12px 0 0;
+
+                @media (max-width: $mg) {
+                    border-radius: 10px 10px 0 0;
+                }
 
                 .dropdown-icon {
                     transform: rotate(180deg);
@@ -242,6 +387,15 @@
             overflow: hidden;
             z-index: 50;
 
+            @media (max-width: $lg) {
+                top: 62px;
+            }
+
+            @media (max-width: $mg) {
+                top: 58px;
+                border-radius: 0 0 10px 10px;
+            }
+
             .dropdown-search {
                 position: sticky;
                 top: 0;
@@ -249,8 +403,10 @@
                 background: $color-secondary;
                 padding: 14px 14px 10px 14px;
                 border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-                position: sticky;
-                top: 0;
+
+                @media (max-width: $mg) {
+                    padding: 12px 12px 9px 12px;
+                }
 
                 .dropdown-input {
                     width: 100%;
@@ -260,6 +416,11 @@
                     font-family: $font-text;
                     font-size: 1.05em;
                     outline: none;
+
+                    @media (max-width: $mg) {
+                        height: 42px;
+                        font-size: 1em;
+                    }
 
                     &:focus {
                         border-color: rgba(0, 0, 0, 0.25);
@@ -280,11 +441,12 @@
                     font-size: 1.05em;
                     opacity: 0.55;
                     color: $color-title-card;
-                }
 
-                & {
-                    position: sticky;
-                    top: 0;
+                    @media (max-width: $mg) {
+                        height: 42px;
+                        right: 22px;
+                        font-size: 1em;
+                    }
                 }
             }
 
@@ -297,6 +459,10 @@
             .dropdown-list {
                 max-height: 300px;
                 overflow-y: auto;
+
+                @media (max-width: $mg) {
+                    max-height: 260px;
+                }
             }
 
             .dropdown-item {
@@ -313,6 +479,11 @@
                     font-family: $font-text;
                     font-size: 1.05em;
                     color: $color-title-card;
+
+                    @media (max-width: $mg) {
+                        padding: 10px 14px;
+                        font-size: 1em;
+                    }
 
                     &:hover {
                         background: rgba(0, 0, 0, 0.05);
@@ -345,11 +516,29 @@
         background: $color-tr;
         box-shadow: 0px 6px 24px 0px rgba(0, 0, 0, 0.08);
 
+        @media (max-width: $lg) {
+            padding: 16px 18px;
+            gap: 14px;
+        }
+
+        @media (max-width: $mg) {
+            padding: 14px 16px;
+            border-radius: 10px;
+        }
+
         .tag-label {
             font-family: $font-text;
             font-size: 1.2em;
             font-weight: 700;
             color: $color-title-card;
+
+            @media (max-width: $lg) {
+                font-size: 1.05em;
+            }
+
+            @media (max-width: $mg) {
+                font-size: 1em;
+            }
         }
 
         .tag-remove {
@@ -359,6 +548,11 @@
             opacity: 0;
             transform: translateX(-4px);
             transition: 0.18s ease;
+
+            @media (max-width: $mg) {
+                opacity: 1;
+                transform: translateX(0);
+            }
         }
 
         &:hover {
@@ -370,11 +564,9 @@
     }
 }
 
-
 // --------------------------------- GALLERY ------------------------------------
 
 #receipe-gallery {
-
     display: grid;
     grid-template-columns: repeat(3, minmax(200px, max-content));
     gap: 90px 65px;
@@ -384,22 +576,42 @@
     align-items: center;
 
     @media (max-width: $xl) {
-
         grid-template-columns: repeat(2, minmax(200px, max-content));
     }
 
-    .no-results {
+    @media (max-width: $lg) {
+        grid-template-columns: 1fr;
+        gap: 40px;
+        margin-top: 44px;
+        padding: 0 18px;
+    }
 
+    @media (max-width: $mg) {
+        gap: 28px;
+        margin-top: 34px;
+        padding: 0 14px;
+    }
+
+    .no-results {
         grid-column: 1 / -1;
         text-align: center;
         font-family: $font-text;
         font-size: 2em;
         color: $color-text-error;
         margin: 100px 0;
+
+        @media (max-width: $lg) {
+            font-size: 1.6em;
+            margin: 70px 0;
+        }
+
+        @media (max-width: $mg) {
+            font-size: 1.35em;
+            margin: 55px 0;
+        }
     }
 
     .recipe-card {
-
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -413,22 +625,53 @@
         opacity: 0;
         animation: CardAppear 1s forwards;
 
-        .card-img {
+        @media (max-width: $xl) {
+            max-width: 520px;
+        }
 
+        @media (max-width: $lg) {
+            max-width: 620px;
+            height: auto;
+            border-radius: 22px;
+        }
+
+        @media (max-width: $mg) {
+            max-width: 100%;
+            border-radius: 18px;
+        }
+
+        .card-img {
             position: relative;
             width: 100%;
             height: 330px;
             border-radius: 24px 24px 0 0;
+
+            @media (max-width: $lg) {
+                height: 280px;
+                border-radius: 22px 22px 0 0;
+            }
+
+            @media (max-width: $mg) {
+                height: 220px;
+                border-radius: 18px 18px 0 0;
+            }
 
             img {
                 width: 100%;
                 height: 100%;
                 object-fit: cover;
                 border-radius: 24px 24px 0 0;
+
+                @media (max-width: $lg) {
+                    border-radius: 22px 22px 0 0;
+                }
+
+                @media (max-width: $mg) {
+                    border-radius: 18px 18px 0 0;
+                }
             }
 
             .recipe-time {
-
                 position: absolute;
                 top: 27px;
                 right: 25px;
@@ -439,19 +682,39 @@
                 font-weight: 300;
                 font-size: 1em;
                 box-shadow: 0px 4px 34px 30px $card-shadow;
+
+                @media (max-width: $lg) {
+                    top: 18px;
+                    right: 18px;
+                    padding: 6px 16px;
+                    font-size: 0.95em;
+                }
+
+                @media (max-width: $mg) {
+                    top: 14px;
+                    right: 14px;
+                    padding: 6px 14px;
+                    font-size: 0.9em;
+                }
             }
         }
 
         .recipe-content {
-
             display: flex;
             flex-direction: column;
             align-items: flex-start;
             justify-content: center;
             padding: 0 30px;
 
-            .recipe-header {
+            @media (max-width: $lg) {
+                padding: 0 22px 24px 22px;
+            }
 
+            @media (max-width: $mg) {
+                padding: 0 18px 20px 18px;
+            }
+
+            .recipe-header {
                 display: flex;
                 flex-direction: column;
 
@@ -461,6 +724,16 @@
                     letter-spacing: 0.5px;
                     margin: 0;
                     margin: 45px 0;
+
+                    @media (max-width: $lg) {
+                        font-size: 1.25em;
+                        margin: 26px 0 18px 0;
+                    }
+
+                    @media (max-width: $mg) {
+                        font-size: 1.15em;
+                        margin: 22px 0 16px 0;
+                    }
                 }
 
                 .recette-txt {
@@ -470,6 +743,10 @@
                     font-weight: 600;
                     letter-spacing: 1px;
                     color: $color-ingrd-card;
+
+                    @media (max-width: $mg) {
+                        font-size: 0.95em;
+                    }
                 }
 
                 .description {
@@ -483,11 +760,21 @@
                     overflow: hidden;
                     height: 100px;
                     margin-top: 15px;
+
+                    @media (max-width: $lg) {
+                        font-size: 1.05em;
+                        height: auto;
+                        max-height: 110px;
+                    }
+
+                    @media (max-width: $mg) {
+                        font-size: 1em;
+                        max-height: 100px;
+                    }
                 }
             }
 
             .recipe-body {
-
                 display: flex;
                 flex-direction: column;
 
@@ -499,6 +786,15 @@
                     letter-spacing: 1px;
                     color: $color-ingrd-card;
                     margin-top: 35px;
+
+                    @media (max-width: $lg) {
+                        margin-top: 22px;
+                    }
+
+                    @media (max-width: $mg) {
+                        margin-top: 18px;
+                        font-size: 0.95em;
+                    }
                 }
 
                 .ingredients {
@@ -508,6 +804,18 @@
                     font-family: $font-text;
                     font-size: 1.1em;
                     margin-top: 15px;
+
+                    @media (max-width: $lg) {
+                        grid-template-columns: repeat(2, minmax(0, 1fr));
+                        gap: 18px 34px;
+                        font-size: 1.02em;
+                    }
+
+                    @media (max-width: $mg) {
+                        grid-template-columns: 1fr;
+                        gap: 12px;
+                        font-size: 1em;
+                    }
 
                     li {
                         display: flex;
@@ -527,7 +835,6 @@
     }
 
     @keyframes CardAppear {
-
         from {
             opacity: 0;
             transform: translateY(50px) scale(1.05);
@@ -540,11 +847,9 @@
     }
 }
 
-
 // --------------------------------- FOOTER ------------------------------------
 
 footer {
-
     display: flex;
     justify-content: center;
     align-items: center;
@@ -553,9 +858,30 @@ footer {
     background: linear-gradient($color-primary, $color-secondary);
     border-top: 1px solid $border-footer;
 
+    @media (max-width: $lg) {
+        height: 120px;
+        margin-top: 60px;
+        padding: 0 18px;
+        text-align: center;
+    }
+
+    @media (max-width: $mg) {
+        height: 110px;
+        margin-top: 50px;
+        padding: 0 14px;
+    }
+
     .footer-txt {
         font-family: $font-text;
         font-size: 1.2em;
         color: $color-title-card;
+
+        @media (max-width: $lg) {
+            font-size: 1.05em;
+        }
+
+        @media (max-width: $mg) {
+            font-size: 1em;
+        }
     }
 }
