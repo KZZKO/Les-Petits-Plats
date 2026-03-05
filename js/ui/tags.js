@@ -123,7 +123,7 @@ function renderDropdownList(dropdown, type, query = "") {
           <button
             type="button"
             class="dropdown-item-btn"
-            data-value="${escapeHtml(value)}"
+            data-value="${value}"
           >
             ${escapeHtml(value)}
           </button>
