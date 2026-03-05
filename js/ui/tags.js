@@ -1,7 +1,8 @@
 import { recipes } from "../data/recipes.js";
 import { renderTagsUI } from "../templates/tagsTemplate.js";
 import { getAllTagOptions, filterDropdownOptions } from "../filters/filter.js";
-import { notifyFiltersChanged, subscribeToResults } from "../filters/filtersController.js";
+import { subscribeToResults } from "../filters/filtersController.js";
+import { controller } from "../main.js";
 
 const tagsState = {
     ingredients: new Set(),
@@ -76,82 +77,95 @@ function closeAllDropdowns(tagsContainer) {
     tagsContainer.querySelectorAll(".dropdown").forEach(closeDropdown);
 }
 
-// Met à jour les chips de tags sélectionnés
+// Met à jour les chips de tags sélectionnés (VERSION BOUCLE FOR)
 function renderSelectedTags() {
     const tagsContainer = document.getElementById("filter-tags");
     if (!tagsContainer) return;
 
-    ["ingredients", "appliances", "ustensils"].forEach((type) => {
-        const group = tagsContainer.querySelector(`.tags-group[data-type="${type}"]`);
-        if (!group) return;
+    const types = ["ingredients", "appliances", "ustensils"];
 
-        group.innerHTML = [...tagsState[type]]
-            .map(
-                (tag) => `
+    for (let i = 0; i < types.length; i++) {
+        const type = types[i];
+        const group = tagsContainer.querySelector(`.tags-group[data-type="${type}"]`);
+        if (!group) continue;
+
+        let html = "";
+        for (const tag of tagsState[type]) {
+            html += `
         <button
           type="button"
           class="tag-chip"
           data-type="${type}"
-          data-value="${escapeHtml(tag)}"
+          data-value="${tag}"
         >
           <span class="tag-label">${escapeHtml(tag)}</span>
           <span class="tag-remove" aria-hidden="true">✕</span>
         </button>
-      `
-            )
-            .join("");
-    });
+      `;
+        }
+
+        group.innerHTML = html;
+    }
 }
 
-// Met à jour la liste d’un dropdown (selected sticky + liste filtrée)
+// Met à jour la liste d’un dropdown (selected sticky + liste filtrée) (VERSION BOUCLE FOR)
 function renderDropdownList(dropdown, type, query = "") {
     const selectedList = dropdown.querySelector(".dropdown-selected");
     const optionsList = dropdown.querySelector(".dropdown-list");
     if (!selectedList || !optionsList) return;
 
     const baseOptions = allOptions[type] || [];
-    const selectedValues = [...tagsState[type]];
+
+    // Copie des sélectionnés
+    const selectedValues = [];
+    for (const v of tagsState[type]) selectedValues.push(v);
 
     // Selected d’abord, puis le reste (sans doublons)
-    const mergedOptions = [
-        ...selectedValues,
-        ...baseOptions.filter((value) => !tagsState[type].has(value)),
-    ];
+    const mergedOptions = [];
+    for (let i = 0; i < selectedValues.length; i++) mergedOptions.push(selectedValues[i]);
+
+    for (let i = 0; i < baseOptions.length; i++) {
+        const value = baseOptions[i];
+        if (!tagsState[type].has(value)) mergedOptions.push(value);
+    }
 
     const filteredOptions = filterDropdownOptions(mergedOptions, query);
 
     // Zone sticky : uniquement sélectionnés
-    selectedList.innerHTML = selectedValues
-        .map(
-            (value) => `
+    let selectedHtml = "";
+    for (let i = 0; i < selectedValues.length; i++) {
+        const value = selectedValues[i];
+        selectedHtml += `
       <li class="dropdown-item is-selected">
-        <button type="button" class="dropdown-item-btn" data-value="${escapeHtml(value)}">
+        <button type="button" class="dropdown-item-btn" data-value="${value}">
           ${escapeHtml(value)}
         </button>
       </li>
-    `
-        )
-        .join("");
+    `;
+    }
+    selectedList.innerHTML = selectedHtml;
 
     // Liste : uniquement non sélectionnés
     const activeSearchQuery = getActiveSearchQuery();
 
-    const remainingOptions = filteredOptions
-        .filter((value) => !tagsState[type].has(value))
-        // UX: si la searchbar contient "chocolat", on ne propose pas le tag "Chocolat"
-        .filter((value) => normalize(value) !== activeSearchQuery);
+    let optionsHtml = "";
+    for (let i = 0; i < filteredOptions.length; i++) {
+        const value = filteredOptions[i];
 
-    optionsList.innerHTML = remainingOptions
-        .map(
-            (value) => `
+        // skip si déjà sélectionné
+        if (tagsState[type].has(value)) continue;
+
+        // UX: si la searchbar contient "chocolat", on ne propose pas le tag "Chocolat"
+        if (normalize(value) === activeSearchQuery) continue;
+        optionsHtml += `
       <li class="dropdown-item">
-        <button type="button" class="dropdown-item-btn" data-value="${escapeHtml(value)}">
+        <button type="button" class="dropdown-item-btn" data-value="${value}">
           ${escapeHtml(value)}
         </button>
       </li>
-    `
-        )
-        .join("");
+    `;
+    }
+    optionsList.innerHTML = optionsHtml;
 }
 
 // Re-render toutes les listes en gardant la saisie en cours
@@ -165,7 +179,7 @@ function rerenderAllDropdownLists(tagsContainer) {
 
 // Envoie l’état des tags au controller
 function notifyController() {
-    notifyFiltersChanged({ tags: cloneTagsState() });
+    controller.notifyFiltersChanged({ tags: cloneTagsState() });
 }
 
 (function initTags() {
@@ -210,12 +224,16 @@ function notifyController() {
         if (optionButton) {
             const dropdown = optionButton.closest(".dropdown");
             const type = dropdown.dataset.type;
-            const value = optionButton.dataset.value;
+            const value = optionButton.dataset.value; // ✅ valeur brute
 
             if (tagsState[type].has(value)) tagsState[type].delete(value);
             else tagsState[type].add(value);
 
-            renderDropdownList(dropdown, type, dropdown.querySelector(".dropdown-input")?.value || "");
+            renderDropdownList(
+                dropdown,
+                type,
+                dropdown.querySelector(".dropdown-input")?.value || ""
+            );
             renderSelectedTags();
             notifyController();
             return;
@@ -224,14 +242,18 @@ function notifyController() {
         const chipButton = event.target.closest(".tag-chip");
         if (chipButton) {
             const type = chipButton.dataset.type;
-            const value = chipButton.dataset.value;
+            const value = chipButton.dataset.value; // ✅ valeur brute
 
             tagsState[type].delete(value);
             renderSelectedTags();
 
             const dropdown = tagsContainer.querySelector(`.dropdown[data-type="${type}"]`);
             if (dropdown) {
-                renderDropdownList(dropdown, type, dropdown.querySelector(".dropdown-input")?.value || "");
+                renderDropdownList(
+                    dropdown,
+                    type,
+                    dropdown.querySelector(".dropdown-input")?.value || ""
+                );
             }
 
             notifyController();
